@@ -177,7 +177,7 @@ app.get(
   SELECT 
     SUM(cases),
     SUM(cured),
-    SUM(active) ,
+    SUM(active),
     SUM(deaths)
   FROM 
     district 
