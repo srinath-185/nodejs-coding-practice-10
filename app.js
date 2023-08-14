@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -42,28 +43,26 @@ const convertDBObjectToResponseObject = (dbObject) => {
   };
 };
 
-function authenticateToken(request, response, next) {
+const authenticateToken = (request, response, next) => {
   let jwtToken;
   const authHeader = request.headers["authorization"];
-
   if (authHeader !== undefined) {
     jwtToken = authHeader.split(" ")[1];
-
-    if (jwtToken !== undefined) {
-      response.status(401);
-      response.send("Invalid JWT token");
-    } else {
-      jwt.verify(jwtToken, "MY_SECRET_TOKEN", (error, payload) => {
-        if (error) {
-          response.status(401);
-          response.send("Invalid token");
-        } else {
-          next();
-        }
-      });
-    }
   }
-}
+  if (jwtToken === undefined) {
+    response.status(401);
+    response.send("Invalid JWT Token");
+  } else {
+    jwt.verify(jwtToken, "MY_SECRET_TOKEN", async (error, payload) => {
+      if (error) {
+        response.status(401);
+        response.send("Invalid JWT Token");
+      } else {
+        next();
+      }
+    });
+  }
+};
 
 app.post("/login/", async (request, response) => {
   const userDetails = request.body;
@@ -73,13 +72,10 @@ app.post("/login/", async (request, response) => {
   const user = await db.get(selectUserQuery);
 
   if (user === undefined) {
-    response.status(401);
+    response.status(400);
     response.send("Invalid user");
   } else {
-    const isPasswordIsMatched = await bcrypt.compare(
-      password,
-      database.password
-    );
+    const isPasswordIsMatched = await bcrypt.compare(password, user.password);
     if (isPasswordIsMatched) {
       const payload = { username: username };
       const jwtoken = jwt.sign(payload, "MY_SECRET_TOKEN");
