@@ -151,13 +151,15 @@ app.put(
       deaths,
     } = request.body;
     const updateDistrictQuery = `UPDATE district 
-    SET district_name = ${districtName},
-    state_id = ${stateId},
-    cases = ${cases},
-    cured = ${cured},
-    active = ${active},
-    deaths = ${deaths}
-    WHERE district_id = ${districtId};`;
+    SET 
+      district_name = '${districtName}',
+      state_id = ${stateId},
+      cases = ${cases},
+      cured = ${cured},
+      active = ${active},
+      deaths = ${deaths}
+    WHERE 
+      district_id = ${districtId};`;
 
     const dbResponse = await db.run(updateDistrictQuery);
     response.send("District Details Updated");
